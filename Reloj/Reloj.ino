@@ -2,6 +2,8 @@
  #include <Shifter.h>;
  #include <Wire.h> 
  #include "RTClib.h" 
+ #define UP 5
+ #define DOWN 6
 
   DS1307 RTC; 
 
@@ -73,6 +75,10 @@ int i=0;
  
 int opcion=0;  // esta me dice la condicion de los minutos, cuarto , diez , punto ,etc...
 
+int m=0;  // variable para entrar a los distintos menus
+int corhora=0; //variable que uso para corregir la hora manualmente
+int cormin=0; //variable que uso para corregir los minutos manualmente
+
  #define SER_pin 11
  #define RCLK_pin 8
  #define SRCLK_pin 12
@@ -86,22 +92,33 @@ void setup() {
     Wire.begin(); 
     RTC.begin(); 
     Serial.begin(9600);
-   // RTC.adjust(DateTime(__DATE__, __TIME__));
-//      if (!RTC.isrunning()) {
-//   
-//    Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
-//   RTC.adjust(DateTime(__DATE__, __TIME__));
-//   }
+
+    pinMode(4,INPUT_PULLUP);
+    pinMode(5,INPUT_PULLUP);
+    pinMode(6,INPUT_PULLUP);
+
+    corhora=0;
+    cormin=0;
+    
+  // RTC.adjust(DateTime(__DATE__, __TIME__));
+  //    if (!RTC.isrunning()) {
+  // 
+  //  Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
+  // RTC.adjust(DateTime(__DATE__, __TIME__));
+  // }
    
 }
 
 void loop() {
-  
+ while (m==0) { 
  DateTime now = RTC.now();
 
  int hora = now.hour();
  int minutos = now.minute();
 
+ hora= hora+corhora;
+ minutos=minutos+cormin;
+ 
  Serial.print(hora);
  Serial.print(":");
  Serial.println(minutos);
@@ -109,8 +126,16 @@ void loop() {
  int decena = now.minute()/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
  int unidad = now.minute() - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
 
+boolean menu = digitalRead(4);
 
-
+  
+  
+ if(menu==LOW)
+  {
+  m=1; // menu 1 entras a el menu para cambiar la hora
+  delay(200);
+  }
+ 
 
  
  if (now.second()==0)
@@ -140,65 +165,29 @@ void loop() {
 
 
  if (minutos>=0 and minutos<5)
-  {
-    opcion=1;
-    }
-
+  {opcion=1;}
   if (minutos>=5 and minutos<10)
-  {
-    opcion=2;
-    }
+  {opcion=2;}
   if (minutos>=10 and minutos<15)
-  {
-    opcion=3;
-    }
+  {opcion=3;}
  if (minutos>=15 and minutos<20)
-  {
-    opcion=4;
-    }
+  {opcion=4;}
  if (minutos>=20 and minutos<25)
-  {
-    opcion=5;
-    }
+  {opcion=5;}
  if (minutos>=25 and minutos<30)
-  {
-    opcion=6;
-    }
-
+  {opcion=6;}
  if (minutos>=30 and minutos<35)
-  {
-    opcion=7;
-    }
-
-  if (minutos>=35 and minutos<40)
-  {
-    opcion=8;
-    hora=hora+1;
-    }
-
-  if (minutos>=40 and minutos<45)
-  {
-    opcion=9;
-    hora=hora+1;
-    }
-
-  if (minutos>=45 and minutos<50)
-  {
-    opcion=10;
-    hora=hora+1;
-    }
-
-  if (minutos>=50 and minutos<55)
-  {
-    opcion=11;
-    hora=hora+1;
-    }
-
-  if (minutos>=55 and minutos<60)
-  {
-    opcion=12;
-    hora=hora+1;
-    }
+  {opcion=7;}
+ if (minutos>=35 and minutos<40)
+  {opcion=8;hora=hora+1;}
+ if (minutos>=40 and minutos<45)
+  {opcion=9;hora=hora+1;}
+ if (minutos>=45 and minutos<50)
+  {opcion=10;hora=hora+1;}
+ if (minutos>=50 and minutos<55)
+  {opcion=11;hora=hora+1;}
+ if (minutos>=55 and minutos<60)
+  {opcion=12;hora=hora+1;}
 
 
  switch (hora){
@@ -215,7 +204,7 @@ void loop() {
     shifter.setPin(es,HIGH);shifter.setPin(la,HIGH);shifter.setPin(son,LOW);shifter.setPin(las,LOW);
 
     
-    shifter.setPin (doce,HIGH); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
     shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,HIGH);
     shifter.write();
     break;
@@ -312,7 +301,7 @@ void loop() {
     shifter.setPin(es,HIGH);shifter.setPin(la,HIGH);shifter.setPin(son,LOW);shifter.setPin(las,LOW);
 
     
-    shifter.setPin (doce,HIGH); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
     shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,HIGH);
     shifter.write();
     break;
@@ -412,73 +401,61 @@ void loop() {
    switch (opcion){
 
     case 1:
-    
     shifter.setPin(menos,LOW);shifter.setPin(en,HIGH);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,HIGH);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 2:
-    
+    case 2:
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,HIGH);
     break;
 
-     case 3:
-    
+    case 3: 
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,HIGH);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 4:
-    
+    case 4:
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,HIGH);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 5:
-    
+    case 5:
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,HIGH);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 6:
-    
+    case 6:
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,HIGH);shifter.setPin(mcinco,HIGH);
     break;
 
-     case 7:
-    
+    case 7:
     shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,HIGH);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 8:
-    
+    case 8:
     shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,HIGH);shifter.setPin(mcinco,HIGH);
     break;
 
-     case 9:
-    
+    case 9: 
     shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,HIGH);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 10:
-    
+    case 10:
     shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,HIGH);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 11:
-    
+    case 11:
     shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,HIGH);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
     break;
 
-     case 12:
-    
+    case 12:
     shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
     shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,HIGH);
     break;
@@ -489,47 +466,430 @@ void loop() {
   case 0:
       shifter.setPin(26,LOW);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
       break;
-
   case 1:
       shifter.setPin(26,HIGH);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
       break;
-
   case 2:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
-      break;
-      
+      break;  
   case 3:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,LOW);
       break;
-  
   case 4:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,HIGH);
       break;
-
   case 5:
       shifter.setPin(26,LOW);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
       break;
-
   case 6:
       shifter.setPin(26,HIGH);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
       break;
-
   case 7:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
-      break;
-      
+      break;    
   case 8:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,LOW);
-      break;
-  
+      break; 
   case 9:
       shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,HIGH);
       break;
      
   }
 
-   
+}
 
+  while (m==1){
+
+    DateTime now = RTC.now();
+
+    int hora = now.hour();
+    
+    if(digitalRead(UP)==LOW)
+    {
+    corhora=corhora+1;
+    delay(200);
+    }
+    if(digitalRead(DOWN)==LOW)
+    {corhora=corhora-1;
+    delay(200);
+      }
+
+    if(digitalRead(4)==LOW)
+    {
+      m=2;
+      delay(200);
+      }
+
+    Serial.println("m=1");
+    Serial.println(corhora);
+    shifter.setAll(LOW);
+    
+    switch (corhora+hora){
+
+  case (0):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,HIGH); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+  
+  case (1):
+    shifter.setPin(es,HIGH);shifter.setPin(la,HIGH);shifter.setPin(son,LOW);shifter.setPin(las,LOW);
+
+    
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,HIGH);
+    shifter.write();
+    break;
+
+  case (2):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,HIGH);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (3):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,HIGH);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (4):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,HIGH);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (5):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,HIGH);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (6):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,HIGH);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (7):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,HIGH);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (8):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,HIGH);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (9):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,HIGH);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (10):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,HIGH);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (11):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+   case (12):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,HIGH); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+   case (13):
+    shifter.setPin(es,HIGH);shifter.setPin(la,HIGH);shifter.setPin(son,LOW);shifter.setPin(las,LOW);
+
+    
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,HIGH);
+    shifter.write();
+    break;
+
+  case (14):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,HIGH);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (15):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,HIGH);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (16):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,HIGH);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (17):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,HIGH);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (18):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,HIGH);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (19):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,HIGH);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (20):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,HIGH);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (21):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,HIGH);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (22):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,HIGH);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+  case (23):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+
+   case (24):
+    shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
+  
+    shifter.setPin (doce,HIGH); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
+    shifter.write();
+    break;
+    }
+  }
+
+  while(m==2){
+    if(digitalRead(UP)==LOW)
+    {
+      cormin=cormin+1;
+      delay(200);
+    }
+    if(digitalRead(DOWN)==LOW)
+    {
+      cormin=cormin-1;
+      delay(200);
+    }
+    if(digitalRead(4)==LOW)
+    {
+      m=0;
+      delay(200);
+    }
+
+     DateTime now = RTC.now();
+     int minutos = now.minute();
+     minutos= minutos+cormin;
+     
+     int decena = minutos/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
+     int unidad = minutos - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
+   
+      shifter.setAll(LOW);
+      shifter.write();
+
+     Serial.println("m=2");
+     Serial.println(cormin);
+     
+      if (minutos>=0 and minutos<5)
+        {opcion=1;}
+      if (minutos>=5 and minutos<10)
+        {opcion=2;}
+      if (minutos>=10 and minutos<15)
+        {opcion=3;}
+      if (minutos>=15 and minutos<20)
+        {opcion=4;}
+      if (minutos>=20 and minutos<25)
+        {opcion=5;}
+      if (minutos>=25 and minutos<30)
+        {opcion=6;}
+      if (minutos>=30 and minutos<35)
+        {opcion=7;}
+      if (minutos>=35 and minutos<40)
+        {opcion=8;}
+      if (minutos>=40 and minutos<45)
+        {opcion=9;}
+      if (minutos>=45 and minutos<50)
+        {opcion=10;}
+      if (minutos>=50 and minutos<55)
+        {opcion=11;}
+      if (minutos>=55 and minutos<60)
+        {opcion=12;}
+
+switch (opcion){
+
+    case 1:
+    shifter.setPin(menos,LOW);shifter.setPin(en,HIGH);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,HIGH);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 2:
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,HIGH);
+    break;
+
+    case 3: 
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,HIGH);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 4: 
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,HIGH);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 5:
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,HIGH);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 6:
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,HIGH);shifter.setPin(mcinco,HIGH);
+    break;
+
+    case 7:
+    shifter.setPin(menos,LOW);shifter.setPin(en,LOW);shifter.setPin(y,HIGH);shifter.setPin(media,HIGH);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 8:
+    shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,HIGH);shifter.setPin(mcinco,HIGH);
+    break;
+
+    case 9:
+    shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,HIGH);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 10:
+    shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,HIGH);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 11:
+    shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,HIGH);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,LOW);
+    break;
+
+    case 12:
+    shifter.setPin(menos,HIGH);shifter.setPin(en,LOW);shifter.setPin(y,LOW);shifter.setPin(media,LOW);shifter.setPin(mdiez,LOW);shifter.setPin(veinte,LOW);shifter.setPin(cuarto,LOW);
+    shifter.setPin(punto,LOW);shifter.setPin(veinti,LOW);shifter.setPin(mcinco,HIGH);
+    break;
+   }
+
+       switch(unidad){
+  
+  case 0:
+      shifter.setPin(26,LOW);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;
+  case 1:
+      shifter.setPin(26,HIGH);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;
+  case 2:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;    
+  case 3:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,LOW);
+      break;
+  case 4:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,HIGH);
+      break;
+  case 5:
+      shifter.setPin(26,LOW);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;
+  case 6:
+      shifter.setPin(26,HIGH);shifter.setPin(27,LOW);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;
+  case 7:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,LOW);shifter.setPin(29,LOW);
+      break;   
+  case 8:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,LOW);
+      break;
+  case 9:
+      shifter.setPin(26,HIGH);shifter.setPin(27,HIGH);shifter.setPin(28,HIGH);shifter.setPin(29,HIGH);
+      break;   
+   }
+       
+  shifter.write();
+
+ 
+  }
+    
+
+    
+  
   
    
 
