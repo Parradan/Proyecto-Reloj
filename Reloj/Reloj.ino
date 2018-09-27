@@ -1,11 +1,13 @@
-                                                                                    
+ #include <EEPROM.h>                                                                                    
  #include <Shifter.h>;
  #include <Wire.h> 
  #include "RTClib.h" 
- #define UP 5
- #define DOWN 6
+ #define UP 2
+ #define DOWN 3
 
   DS1307 RTC; 
+ int address1=1;
+ int address2=2;
 
  int DATO1 = 0;
  int DATO2 = 1;
@@ -94,13 +96,15 @@ void setup() {
     Serial.begin(9600);
 
     pinMode(4,INPUT_PULLUP);
-    pinMode(5,INPUT_PULLUP);
-    pinMode(6,INPUT_PULLUP);
+    pinMode(2,INPUT_PULLUP);
+    pinMode(3,INPUT_PULLUP);
 
-    corhora=0;
-    cormin=0;
-    
-  // RTC.adjust(DateTime(__DATE__, __TIME__));
+    corhora=EEPROM.read(address1);
+    cormin=EEPROM.read(address2);
+    //EEPROM.write(address1,0);
+    //EEPROM.write(address2,0);
+   
+   // RTC.adjust(DateTime(__DATE__, __TIME__));
   //    if (!RTC.isrunning()) {
   // 
   //  Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
@@ -284,7 +288,7 @@ boolean menu = digitalRead(4);
   case (11):
     shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
   
-    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (doce,LOW); shifter.setPin (once,HIGH);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
     shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
     shifter.write();
     break;
@@ -381,7 +385,7 @@ boolean menu = digitalRead(4);
   case (23):
     shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
   
-    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (doce,LOW); shifter.setPin (once,HIGH);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
     shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
     shifter.write();
     break;
@@ -516,6 +520,7 @@ boolean menu = digitalRead(4);
 
     if(digitalRead(4)==LOW)
     {
+      EEPROM.write(address1,corhora);
       m=2;
       delay(200);
       }
@@ -715,7 +720,7 @@ boolean menu = digitalRead(4);
   case (23):
     shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
   
-    shifter.setPin (doce,LOW); shifter.setPin (once,LOW);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
+    shifter.setPin (doce,LOW); shifter.setPin (once,HIGH);shifter.setPin (diez,LOW);shifter.setPin (nueve,LOW);shifter.setPin (ocho,LOW);
     shifter.setPin (siete,LOW);shifter.setPin (seis,LOW);shifter.setPin (cinco,LOW);shifter.setPin (cuatro,LOW);shifter.setPin (tres,LOW);shifter.setPin (dos,LOW);shifter.setPin (una,LOW);
     shifter.write();
     break;
@@ -743,6 +748,7 @@ boolean menu = digitalRead(4);
     }
     if(digitalRead(4)==LOW)
     {
+      EEPROM.write(address2,cormin);
       m=0;
       delay(200);
     }
@@ -885,6 +891,8 @@ switch (opcion){
   shifter.write();
 
  
+
+  
   }
     
 
