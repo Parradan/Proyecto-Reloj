@@ -104,7 +104,7 @@ void setup() {
     //EEPROM.write(address1,0);
     //EEPROM.write(address2,0);
    
-   // RTC.adjust(DateTime(__DATE__, __TIME__));
+    //RTC.adjust(DateTime(__DATE__, __TIME__));
   //    if (!RTC.isrunning()) {
   // 
   //  Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
@@ -114,6 +114,7 @@ void setup() {
 }
 
 void loop() {
+
  while (m==0) { 
  DateTime now = RTC.now();
 
@@ -754,11 +755,11 @@ boolean menu = digitalRead(4);
     }
 
      DateTime now = RTC.now();
-     int minutos = now.minute();
-     minutos= minutos+cormin;
+     int minu = now.minute();
+     minu= minu+cormin;
      
-     int decena = minutos/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
-     int unidad = minutos - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
+     int decena = minu/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
+     int unidad = minu - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
    
       shifter.setAll(LOW);
       shifter.write();
@@ -766,29 +767,29 @@ boolean menu = digitalRead(4);
      Serial.println("m=2");
      Serial.println(cormin);
      
-      if (minutos>=0 and minutos<5)
+      if (minu>=0 and minu<5)
         {opcion=1;}
-      if (minutos>=5 and minutos<10)
+      if (minu>=5 and minu<10)
         {opcion=2;}
-      if (minutos>=10 and minutos<15)
+      if (minu>=10 and minu<15)
         {opcion=3;}
-      if (minutos>=15 and minutos<20)
+      if (minu>=15 and minu<20)
         {opcion=4;}
-      if (minutos>=20 and minutos<25)
+      if (minu>=20 and minu<25)
         {opcion=5;}
-      if (minutos>=25 and minutos<30)
+      if (minu>=25 and minu<30)
         {opcion=6;}
-      if (minutos>=30 and minutos<35)
+      if (minu>=30 and minu<35)
         {opcion=7;}
-      if (minutos>=35 and minutos<40)
+      if (minu>=35 and minu<40)
         {opcion=8;}
-      if (minutos>=40 and minutos<45)
+      if (minu>=40 and minu<45)
         {opcion=9;}
-      if (minutos>=45 and minutos<50)
+      if (minu>=45 and minu<50)
         {opcion=10;}
-      if (minutos>=50 and minutos<55)
+      if (minu>=50 and minu<55)
         {opcion=11;}
-      if (minutos>=55 and minutos<60)
+      if (minu>=55 and minu<60)
         {opcion=12;}
 
 switch (opcion){
