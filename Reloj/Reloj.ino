@@ -101,10 +101,10 @@ void setup() {
 
     corhora=EEPROM.read(address1);
     cormin=EEPROM.read(address2);
-    //EEPROM.write(address1,0);
-    //EEPROM.write(address2,0);
+   // EEPROM.write(address1,0);
+   // EEPROM.write(address2,0);
    
-    //RTC.adjust(DateTime(__DATE__, __TIME__));
+   // RTC.adjust(DateTime(__DATE__, __TIME__));
   //    if (!RTC.isrunning()) {
   // 
   //  Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
