@@ -9,39 +9,6 @@
  int address1=1;
  int address2=2;
 
- int DATO1 = 0;
- int DATO2 = 1;
- int DATO3 = 2;
- int DATO4 = 3;
- int DATO5 = 4;
- int DATO6 = 5;
- int DATO7 = 6;
- int DATO8 = 7;
- int DATO9 = 8;
- int DATO10 = 9;
- int DATO11 = 10;
- int DATO12 = 11;
- int DATO13 = 12;
- int DATO14 = 13;
- int DATO15 = 14;
- int DATO16 = 15;
- int DATO17 = 16;
- int DATO18 = 17;
- int DATO19 = 18;
- int DATO20 = 19;
- int DATO21 = 20;
- int DATO22 = 21;
- int DATO23 = 22;
- int DATO24 = 23;
- int DATO25 = 24;
- int DATO26 = 25;
- int DATO27 = 26;
- int DATO28 = 27;
- int DATO29 = 28;
- int DATO30 = 29;
- int DATO31 = 30;
- int DATO32 = 31;
- 
 int son=0;
 int es=1;
 int las=2;
@@ -81,6 +48,9 @@ int m=0;  // variable para entrar a los distintos menus
 int corhora=0; //variable que uso para corregir la hora manualmente
 int cormin=0; //variable que uso para corregir los minutos manualmente
 
+bool entro=0; //Con esta variable hago la correcion, e impido que entre en un loop
+int contador=0; //Contador que se encarga de corregir aun mejor cada 10 dias 9 segundos más
+ 
  #define SER_pin 11
  #define RCLK_pin 8
  #define SRCLK_pin 12
@@ -95,17 +65,20 @@ void setup() {
     RTC.begin(); 
     Serial.begin(9600);
 
-    pinMode(4,INPUT_PULLUP);
-    pinMode(2,INPUT_PULLUP);
-    pinMode(3,INPUT_PULLUP);
+    pinMode(4,INPUT_PULLUP);//MENU
+    pinMode(2,INPUT_PULLUP);//UP
+    pinMode(3,INPUT_PULLUP);//DOWN
+    pinMode(5,INPUT_PULLUP);// RESET ALL
+    
+    
 
     corhora=EEPROM.read(address1);
     cormin=EEPROM.read(address2);
-   // EEPROM.write(address1,0);
-   // EEPROM.write(address2,0);
+  // EEPROM.write(address1,0);
+  // EEPROM.write(address2,0);
    
-   // RTC.adjust(DateTime(__DATE__, __TIME__));
-  //    if (!RTC.isrunning()) {
+    // RTC.adjust(DateTime(__DATE__, __TIME__));
+  //if (!RTC.isrunning()) {
   // 
   //  Serial.println("RTC is NOT running!");// following line sets the RTC to the date & time this sketch was compiled
   // RTC.adjust(DateTime(__DATE__, __TIME__));
@@ -120,20 +93,68 @@ void loop() {
 
  int hora = now.hour();
  int minutos = now.minute();
+ int segundos= now.second();  
+
 
  hora= hora+corhora;
  minutos=minutos+cormin;
  
- Serial.print(hora);
- Serial.print(":");
- Serial.println(minutos);
+ //Serial.print(corhora);
+ //Serial.print(":");
+ //Serial.println(cormin);
+ //Serial.print(String(hora));Serial.print(":");Serial.print(String(minutos));Serial.print(":");Serial.print(String(segundos-10));Serial.println("");
+ //Serial.println(String(hora)+":"+String(minutos)+":"+String(segundos));
+
+ int decena = minutos/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
+ int unidad = minutos - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
+
+ boolean menu = digitalRead(4);          //LEO EL BOTON QUE ES EL UNICO QUE ACTIVA EL MENU.
+ boolean resetall= digitalRead(5);       //LEO EL BOTON QUE DA RESET A TODO
+
+
+    //////////////////////////////////////////////////////////////
+    /////////////CORRECCION DERIVA DE HORA////////////////////////
+    //////////////////////////////////////////////////////////////
  
- int decena = now.minute()/10;                // ESTOS LOS USO PARA PRENDER LOS LEDS INDEPENDIENTES DE 
- int unidad = now.minute() - (decena*10);     //               LOS   MINUTOS 1 2 3 Y 4
-
-boolean menu = digitalRead(4);
-
+ if((now.hour()==0) && (now.minute()==0) && (now.second()==50) && entro==0) //CADA DÍA CORRIGE 9 SEGUNDOS
+ {
+  RTC.adjust(DateTime(now.year(),now.day(),now.month(),now.hour(),now.minute(),now.second()-9));
+  entro=1;
+  contador++;
+  delay(500);
+  }
+  if((now.hour()==0) && (now.minute()==0) && (now.second()==21) && entro==1)
+  {
+    entro=0;
+    }
+  if (contador==10) //CADA 10 DÍAS CORRIGE 9 SEGUNDOS MENOS
+  {
+    RTC.adjust(DateTime(now.year(),now.day(),now.month(),now.hour(),now.minute(),now.second()-9));
+    contador=0;
+    }
+  //////////////////////////////////////////////////// 
   
+    //////////////////////////////////////////////////////////////////////////////
+    /////////////RESETEO DE LA EEPROM, EN CASO DE QUE ALGO FALLE//////////////////
+    //////////////////////////////////////////////////////////////////////////////
+  if(resetall==0)
+  { 
+    EEPROM.write(address1,0);
+    EEPROM.write(address2,0);
+    RTC.adjust(DateTime(2019,25,01,0,0,0));
+    delay(200);
+    }
+  ////////////////////////////////////////////////////////////////////
+
+  ////////////////////////////////////////////////////////////////////
+  //////////////////RESET DE SEGURIDAD////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
+  if(cormin>=100)
+  {
+    EEPROM.write(address1,0);
+    EEPROM.write(address2,0);
+    delay(200);
+    }
   
  if(menu==LOW)
   {
@@ -508,6 +529,7 @@ boolean menu = digitalRead(4);
     DateTime now = RTC.now();
 
     int hora = now.hour();
+    hora= hora+corhora;
     
     if(digitalRead(UP)==LOW)
     {
@@ -530,7 +552,7 @@ boolean menu = digitalRead(4);
     Serial.println(corhora);
     shifter.setAll(LOW);
     
-    switch (corhora+hora){
+    switch (hora){
 
   case (0):
     shifter.setPin(son,HIGH);shifter.setPin(las,HIGH);shifter.setPin(es,LOW);shifter.setPin(la,LOW);
@@ -891,15 +913,6 @@ switch (opcion){
        
   shifter.write();
 
- 
-
-  
   }
-    
-
-    
-  
-  
-   
 
 }
